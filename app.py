@@ -49,6 +49,27 @@ def load_overall_analysis():
     st.pyplot(fig3)
 
 
+def load_startup_details(startup):
+    st.title(startup)
+    # Startups = df['startup'].nunique()
+    invested_money = df[df['startup'].str.contains(startup)].groupby('startup')['amount'].sum().sort_values(ascending = False)
+    st.subheader("Invested Money")
+    st.dataframe(invested_money)
+
+    # operating in city
+    city = df[df['startup'].str.contains(startup)]
+    sub_city = city[['startup', 'city']]
+    st.subheader("City Operating In")
+    st.dataframe(sub_city)
+
+    # vertical wise investment
+    vertical_invest = df[df['startup'].str.contains(startup)].groupby(['startup','vertical'])['amount'].sum().sort_values(ascending = False).head()
+
+    st.subheader('Vertical Wise Investment')
+
+    fig0, ax = plt.subplots()
+    ax.pie(vertical_invest, labels = vertical_invest.index,autopct = "%0.01f%%")
+    st.pyplot(fig0)
 def load_investor_details(investor):
     st.title(investor)
     # recent 5 transactions
@@ -109,9 +130,10 @@ if option == 'Overall Analysis':
     load_overall_analysis()
 
 elif option == 'Startup':
-    st.sidebar.selectbox('Select Startup',sorted(df['startup'].unique().tolist()))
+    selected_startup = st.sidebar.selectbox('Select Startup',sorted(df['startup'].unique().tolist()))
     btn1 = st.sidebar.button('Find Startup Details')
-    st.title('Startup Analysis')
+    if btn1:
+        load_startup_details(selected_startup)
 else:
     selected_investor = st.sidebar.selectbox('Select Investor', sorted(set(df['investors'].str.split(',').sum())))
     btn2 = st.sidebar.button('Find Investor Details')
